@@ -25,6 +25,38 @@
 defined('MOODLE_INTERNAL') || die();
 
 if ($hassiteconfig) {
+    $loggingmode = new admin_setting_configselect(
+        'logstore_lanalytics/loggingmode',
+        get_string('setting_loggingmode', 'logstore_lanalytics'),
+        get_string('setting_loggingmode_descr', 'logstore_lanalytics'),
+        'realtime',
+        [
+            'realtime' => get_string('setting_loggingmode_realtime', 'logstore_lanalytics'),
+            'scheduled' => get_string('setting_loggingmode_scheduled', 'logstore_lanalytics'),
+        ]
+    );
+    // The import checkpoint is only valid while scheduled mode runs uninterrupted.
+    $loggingmode->set_updatedcallback(function () {
+        unset_config('lastimportedid', 'logstore_lanalytics');
+    });
+    $settings->add($loggingmode);
+
+    $settings->add(new admin_setting_configtext(
+        'logstore_lanalytics/import_batchsize',
+        get_string('setting_import_batchsize', 'logstore_lanalytics'),
+        get_string('setting_import_batchsize_descr', 'logstore_lanalytics'),
+        '10000',
+        PARAM_INT
+    ));
+
+    $settings->add(new admin_setting_configtext(
+        'logstore_lanalytics/import_timelimit',
+        get_string('setting_import_timelimit', 'logstore_lanalytics'),
+        get_string('setting_import_timelimit_descr', 'logstore_lanalytics'),
+        '300',
+        PARAM_INT
+    ));
+
     $settings->add(new admin_setting_configselect(
         'logstore_lanalytics/log_scope',
         get_string('setting_log_scope', 'logstore_lanalytics'),
